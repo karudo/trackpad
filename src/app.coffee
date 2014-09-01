@@ -1,23 +1,38 @@
 http = require 'http'
 url = require 'url'
+#events = require 'events'
 
-methods = require 'methods'
+methods = require './methods'
 {capitalize} = require './utils'
 
-class RequestWrapper
+
+class RequestWrapper #extends events.EventEmitter
   constructor: (@type, @url, @app)->
+    @_funcs =
+      beforeDo: []
+      afterDo: []
+      beforeEnd: []
+
+  use: (middleware)->
+    #middleware
+    @
+
+
+  doIt: (@_func)->
+    @
+
 
 
 class App
   constructor: ->
     @queryMap = {}
 
-  listen: (server)->
+  listen: (server, args...)->
     if server instanceof http.Server
       @server = server
     else
       @server = http.createServer()
-      @server.listen arguments...
+      @server.listen server, args...
 
     @server.on 'request', @_onRequest
 
@@ -30,10 +45,10 @@ class App
 
 
   methods.forEach (m)=>
-    @::['when'+capitalize(m)] = (url)->
+    mName = "when + #{capitalize(m)}"
+    @::[mName] = (url)->
       @when m, url
 
-  #doThe: ->
 
 a = new App
 a.listen 1234
